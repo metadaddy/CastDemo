@@ -1,0 +1,23 @@
+{
+  "name": "NodeCast",
+  "version": "0.0.1",
+  "description": "Sender app for Demo of Google Cast with a Visualforce Chart",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metadaddy-sfdc/CastDemo.git"
+  },
+  "author": "Pat Patterson",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/metadaddy-sfdc/CastDemo/issues"
+  },
+  "dependencies": {
+    "nforce": "~0.7.0-beta.1",
+    "express": "~3.4.8",
+    "ejs": "~0.8.5"
+  }
+}

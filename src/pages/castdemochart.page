@@ -1,0 +1,36 @@
+<apex:page docType="html-5.0" applyHtmlTag="false" applyBodyTag="false"
+           showHeader="false" sidebar="false" standardStylesheets="false"
+           cache="false" controller="ChartController">
+<html>
+  <head>
+    <style>
+      body {
+        overflow:hidden;
+	    font-family:Verdana, Geneva, sans-serif;
+      }
+      .content {
+        height: 720px;
+        width: 1280px;
+        border: 0px;
+        background-color: #FFFFFF;
+        color: #000000;
+        text-align:center;
+        display: table-cell;
+        vertical-align:middle;
+      }
+    </style>
+    <title>Chart</title>
+  </head>
+  <body>
+    <div class="content">
+      <h1>Top {!$CurrentPage.parameters.limit} Accounts by Total Opportunity Amount</h1>
+      <apex:chart height="550" width="1000" data="{!pieData}">
+        <apex:pieSeries dataField="TotalAmount" labelField="Name">
+          <apex:chartLabel display="none"/>
+        </apex:pieSeries>
+        <apex:legend id="legend" font="bold 20px Helvetica" position="right"/>
+      </apex:chart>
+    </div>
+  </body>
+</html>
+</apex:page>
