@@ -1,3 +1,6 @@
+<apex:page docType="html-5.0" applyHtmlTag="false" applyBodyTag="false"
+           showHeader="false" sidebar="false" standardStylesheets="false"
+           cache="false">
 <!--
 Copyright (C) 2014 Google Inc. All Rights Reserved.
 
@@ -13,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-<!DOCTYPE html>
+<!-- <!DOCTYPE html> -->
 <html>
 <head>
 <title>Hello World</title>
@@ -29,15 +32,10 @@ html, body, #wrapper {
    vertical-align: middle;
    text-align: center;
 }
-input, label, select {
+input {
   font-family: "Arial", Arial, sans-serif;
-  font-size: 20px;
+  font-size: 40px;
   font-weight: bold;	
-}
-input[type="submit"] {
-  -webkit-appearance: button;
-  font-size: 20px;
-  font-weight: normal;  
 }
 .border {
     border: 2px solid #cccccc;
@@ -51,8 +49,8 @@ input[type="submit"] {
 </style>
 <script type="text/javascript" src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
 <script type="text/javascript">
-var applicationID = '69012C1D';
-var namespace = 'urn:x-cast:com.force.demo.cast';
+var applicationID = 'D07C222E';
+var namespace = 'urn:x-cast:com.google.cast.sample.helloworld';
 var session = null;
 
 /**
@@ -183,9 +181,7 @@ function appendMessage(message) {
  * utility function to handle text typed in by user in the input field
  */
 function update() {
-  var url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/apex/' %>'+document.getElementById("select").value;
-  console.log("Sending", url);
-  sendMessage(url);
+  sendMessage(document.getElementById("input").value);
 }
 
 /**
@@ -202,13 +198,7 @@ function transcribe(words) {
 	<tr>
 		<td>
 			<form method="get" action="JavaScript:update();">
-				<label for="input">Visualforce Page: </label>
-        <select class="border" id="select">
-        <% for(var i=0; i<pages.length; i++) { %>
-           <option value="<%= pages[i].get('Name') %>"><%= pages[i].get('Name') %></option>
-        <% } %>
-        </select>
-        <input type="submit" value="Send" />
+				<input id="input" class="border" type="text" size="30" onwebkitspeechchange="transcribe(this.value)" x-webkit-speech="true"/>
 			</form>
 		</td>
 	</tr>
@@ -221,7 +211,8 @@ function transcribe(words) {
   </div>
 
 <script type="text/javascript">
-  document.getElementById("select").focus();
+  document.getElementById("input").focus();
 </script>
 </body>
 </html>
+</apex:page>

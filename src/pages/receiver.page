@@ -16,102 +16,89 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<!-- <!DOCTYPE html> -->
 <html>
   <head>
     <style type="text/css">
-      body {
-        overflow:hidden;
-      }
-      .content {
-        height: 720px;
-        width: 1280px;
-        border: 0px;
-        background-color: #FFFFFF;
-        color: #000000;
-      }
-      #message{
-      text-align:center;
-      display: table-cell;
-      vertical-align:middle;
-      font-weight:bold;
-      font-family:Verdana, Geneva, sans-serif;
-      font-size:40px;
-    }
+	  body {
+	    overflow:hidden;
+	  }
+      div{
+	    height:720PX;
+	    width:1280PX;
+	    text-align:center;
+	    border:0px solid silver;
+	    display: table-cell;
+	    vertical-align:middle;
+	    color:#FFFFFF;
+	    background-color:#000000;
+	    font-weight:bold;
+	    font-family:Verdana, Geneva, sans-serif;
+	    font-size:40px;
+	}
     </style>
-    <title>Visualforce Cast Demo</title>
+    <title>Cast Hello Text</title>
   </head>
   <body>
-  <div class="content" id="message">Waiting for sender...</div>
-  <div class="content" id="framediv" style="display: none;">
-      <iframe id="iframe" width="100%" height="100%" frameborder="0" />
-    </div>
+	<DIV id="message">Talk to me</DIV>
     <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
     <script type="text/javascript">
-      var interval = null;
       window.onload = function() {
         cast.receiver.logger.setLevelValue(0);
         window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
         console.log('Starting Receiver Manager');
-          
+        
         // handler for the 'ready' event
         castReceiverManager.onReady = function(event) {
           console.log('Received Ready event: ' + JSON.stringify(event.data));
           window.castReceiverManager.setApplicationState("Application status is ready...");
         };
-          
+        
         // handler for 'senderconnected' event
         castReceiverManager.onSenderConnected = function(event) {
           console.log('Received Sender Connected event: ' + event.data);
           console.log(window.castReceiverManager.getSender(event.data).userAgent);
         };
-          
+        
         // handler for 'senderdisconnected' event
         castReceiverManager.onSenderDisconnected = function(event) {
           console.log('Received Sender Disconnected event: ' + event.data);
-          // Don't close - we want the app to carry on running!
+          if (window.castReceiverManager.getSenders().length == 0) {
+	        window.close();
+	      }
         };
-          
+        
         // handler for 'systemvolumechanged' event
         castReceiverManager.onSystemVolumeChanged = function(event) {
           console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' +
               event.data['muted']);
         };
-  
+
         // create a CastMessageBus to handle messages for a custom namespace
         window.messageBus =
           window.castReceiverManager.getCastMessageBus(
-              'urn:x-cast:com.force.demo.cast');
-  
+              'urn:x-cast:com.google.cast.sample.helloworld');
+
         // handler for the CastMessageBus message event
         window.messageBus.onMessage = function(event) {
           console.log('Message [' + event.senderId + ']: ' + event.data);
-              
-          var url = event.data;
-            
-          // inform all senders on the CastMessageBus
+          // display the message from the sender
+          displayText(event.data);
+          // inform all senders on the CastMessageBus of the incoming message event
           // sender message listener will be invoked
-          window.messageBus.send(event.senderId, "Loading "+url);
-    
-          // Hide the message and show the iframe
-          document.getElementById('message').style.display = 'none';
-          document.getElementById('framediv').style.display = 'block';
-          
-          // Load the page into the iframe
-          document.getElementById('iframe').src = url;
-
-          // Reload iframe every 10 minutes, so the session doesn't expire
-          if (interval) {
-              clearInterval(interval);
-          }
-          interval = setInterval(function(){
-              console.log('Reloading iframe');
-              document.getElementById('iframe').src = url;
-          }, 10*60*1000);
+          window.messageBus.send(event.senderId, event.data);
         }
-  
+
         // initialize the CastReceiverManager with an application status message
         window.castReceiverManager.start({statusText: "Application is starting"});
-        console.log('Receiver Manager started');          
+        console.log('Receiver Manager started');
+      };
+      
+      // utility function to display the text message in the input field
+      function displayText(text) {
+        console.log(text);
+        document.getElementById("message").innerHTML=text;
+        window.castReceiverManager.setApplicationState(text);
       };
     </script>
   </body>

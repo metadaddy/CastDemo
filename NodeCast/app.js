@@ -37,8 +37,16 @@ app.configure('production', function(){
 
 app.get('/', function(req, res){
   if (req.session.oauth) {
-    res.render('castdemosender', {
-      oauth: req.session.oauth
+    var query = 'SELECT Name FROM ApexPage ORDER BY Name';
+    org.query({query: query, oauth: req.session.oauth}, function(err, resp) {
+      if(!err) {
+        res.render('castdemosender', {
+          oauth: req.session.oauth,
+          pages: resp.records
+        });
+      } else {
+        res.send(err.message);
+      }
     });
   } else {
     res.redirect(org.getAuthUri());
