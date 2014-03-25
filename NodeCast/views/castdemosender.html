@@ -25,11 +25,17 @@ html, body, #wrapper {
    padding: 0;
    border: 0;
 }
+#inner {
+  margin: 0 auto;  
+}
 #wrapper td {
    vertical-align: middle;
    text-align: center;
 }
-input, label, select {
+#inner td {
+   text-align: left;
+}
+input, label, select, body {
   font-family: "Arial", Arial, sans-serif;
   font-size: 20px;
   font-weight: bold;	
@@ -49,11 +55,36 @@ input[type="submit"] {
     box-shadow: 0 0 5px #8ecaed;
 }
 </style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+<script>
+/**
+ * initialization - this must happen before Cast library is loaded!
+ */
+if (window.chrome) {
+  window['__onGCastApiAvailable'] = function(loaded, errorInfo) {
+    console.log('__onGCastApiAvailable: loaded = '+loaded);
+    if (!loaded) {
+      console.log(errorInfo);
+      $(document).ready(function(){
+        $('#errorMessage').text(errorInfo);
+        $('#send').attr('disabled', 'disabled');
+      });
+    }
+  }
+} else {
+  $(document).ready(function(){
+    $('#errorMessage').text("Not in Chrome browser!");
+    $('#send').attr('disabled', 'disabled');
+  });
+}
+    
+</script>
 <script type="text/javascript" src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
 <script type="text/javascript">
-var applicationID = '69012C1D';
+var applicationID = '<%= process.env.CAST_APP_ID %>';
 var namespace = 'urn:x-cast:com.force.demo.cast';
 var session = null;
+var pages = JSON.parse('<%- JSON.stringify(pages) %>');
 
 /**
  * Call initialization for Cast
@@ -175,17 +206,65 @@ function sendMessage(message) {
  */
 function appendMessage(message) {
   console.log(message);
-  var dw = document.getElementById("debugmessage");
-  dw.innerHTML += '\n' + JSON.stringify(message);
+  $('#debugmessage').append('\n' + JSON.stringify(message));
 };
 
 /**
- * utility function to handle text typed in by user in the input field
+ * Send URL to receiver
  */
 function update() {
-  var url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/apex/' %>'+document.getElementById("select").value;
+  var index = parseInt($("#select").val(), 10);
+  var url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/apex/' %>'+
+    pages[index].name;
+  if (pages[index].controllertype === "1") {
+    url += '?id='+$('#record').val();
+  }
   console.log("Sending", url);
   sendMessage(url);
+}
+
+function selectChange() {
+  var $send = $('#send');
+  var $pageSelect = $('#select');
+  var $recSelect = $('#record');
+  var $recordrow = $('#recordrow');
+
+  var index = parseInt($pageSelect.val(), 10);
+  if (pages[index].controllertype === "1") {
+    // Standard controller
+    $send.attr('disabled', 'disabled');
+    $recordrow.css({"visibility":"visible"});
+    $recSelect
+      .attr('disabled', 'disabled')
+      .find('option')
+      .remove()
+      .end()
+      .append('<option value="-1">Querying...</option>');
+    $.ajax( '/records', {
+      type: 'GET',
+      data: { objType: pages[index].controllerkey },
+      success: function( data, status, xhr ) {
+        $recSelect
+          .removeAttr('disabled')
+          .find('option')
+          .remove();
+        $.each(data.records, function(key, record) {
+          $recSelect.append($("<option/>", {
+            value: record.id,
+            text: record[data.nameField]
+          }));
+        });
+      },
+      error: function( xhr, status, error ) {
+        console.log( 'ERROR: ', error );
+      },
+      complete: function() {
+        $send.removeAttr('disabled');
+      }      
+    });
+  } else {
+    $recordrow.css({"visibility":"hidden"});
+  }
 }
 
 /**
@@ -201,14 +280,42 @@ function transcribe(words) {
   <table id="wrapper">
 	<tr>
 		<td>
-			<form method="get" action="JavaScript:update();">
-				<label for="input">Visualforce Page: </label>
-        <select class="border" id="select">
-        <% for(var i=0; i<pages.length; i++) { %>
-           <option value="<%= pages[i].get('Name') %>"><%= pages[i].get('Name') %></option>
-        <% } %>
-        </select>
-        <input type="submit" value="Send" />
+			<form method="get" action="javascript:update();">
+        <table id="inner">
+          <tr>
+            <td>
+              <label for="select">Visualforce Page: </label>
+            </td>
+            <td>
+              <select class="border" id="select" onchange="selectChange()">
+              <% for(var i=0; i<pages.length; i++) { %>
+                 <option value="<%= i %>"><%= pages[i].get('Name') %></option>
+              <% } %>
+              </select>
+            </td>
+            <td>
+              <input id="send" type="submit" value="Send" />
+            </td>
+          </tr>
+          <tr id="recordrow" style="visibility: hidden;">
+            <td>
+              <label for="record">Record: </label>
+            </td>
+            <td>
+              <select class="border" id="record" >
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              <p id="errorMessage"></p>
+            </td>
+          </tr>
+            <td colspan="3" style="text-align: center;">
+              <a href="/">Home</a>
+            </td>
+          </tr>
+        </table>
 			</form>
 		</td>
 	</tr>
@@ -221,7 +328,7 @@ function transcribe(words) {
   </div>
 
 <script type="text/javascript">
-  document.getElementById("select").focus();
+  $("#select").focus();
 </script>
 </body>
 </html>
