@@ -1,6 +1,11 @@
 Load Visualforce Pages on Google Chromecast
 ===========================================
 
+Try it out!
+-----------
+
+Go to https://vf-chromecast.herokuapp.com/ and follow the instructions to cast a Visualforce Page to Google Chromecast!
+
 CastHelloText
 -------------
 
