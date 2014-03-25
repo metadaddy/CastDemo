@@ -14,4 +14,4 @@ CastHelloText
 CastVisualforce
 ---------------
 
-`castdemoreceiver.page` and `NodeCast` comprise a more elaborate demo. `NodeCast` allows you to login and select a Visualforce page to cast to the device. `castdemoreceiver.page` loads the Visualforce page into an iframe, and remains active, waiting for further commands and periodically refreshing the page.
+`castdemoreceiver.page` and `vf-chromecast` comprise a more elaborate demo. `vf-chromecast` allows you to login and select a Visualforce page to cast to the device. `castdemoreceiver.page` loads the Visualforce page into an iframe, and remains active, waiting for further commands and periodically refreshing the page.
