@@ -80,7 +80,6 @@ if (window.chrome) {
       $(document).ready(function(){
         $('#errorMessage').text(errorInfo);
         $('#sendURL,sendPage').attr('disabled', 'disabled');
-        typeChange();
        
         //specify which form button was selected 
         $("form input[type=submit]").click(function() {
@@ -252,6 +251,7 @@ function update() {
 
 function typeChange() {
     var type = $('input[name=type]:checked').val();
+    console.log(type);
      
     $('#urlrow').toggleClass('hidden', type === 'vfpage');
     $('#pagerow').toggleClass('hidden', type !== 'vfpage');
@@ -326,7 +326,7 @@ function transcribe(words) {
                     <input type="radio" name="type" value="customurl" onChange="typeChange()"/>Custom URL
                 </td>
             </tr>
-            <tr id="urlrow">
+            <tr id="urlrow" class="hidden">
                 <td>
                     <label>Custom URL:</label>
                 </td>
