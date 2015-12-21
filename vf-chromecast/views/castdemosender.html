@@ -40,6 +40,15 @@ input, label, select, body {
   font-size: 20px;
   font-weight: bold;	
 }
+label {
+    width: 175px;
+    display: block;
+}
+input[type="text"],
+select {
+    width: 400px;
+}
+
 input[type="submit"] {
   -webkit-appearance: button;
   font-size: 20px;
@@ -54,6 +63,9 @@ input[type="submit"] {
     border-color: #8ecaed;
     box-shadow: 0 0 5px #8ecaed;
 }
+.hidden {
+    display: none;
+}
 </style>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script>
@@ -67,14 +79,21 @@ if (window.chrome) {
       console.log(errorInfo);
       $(document).ready(function(){
         $('#errorMessage').text(errorInfo);
-        $('#send').attr('disabled', 'disabled');
+        $('#sendURL,sendPage').attr('disabled', 'disabled');
+        typeChange();
+       
+        //specify which form button was selected 
+        $("form input[type=submit]").click(function() {
+            $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
+            $(this).attr("clicked", "true");
+        });
       });
     }
   }
 } else {
   $(document).ready(function(){
     $('#errorMessage').text("Not in Chrome browser!");
-    $('#send').attr('disabled', 'disabled');
+    $('#sendURL,sendPage').attr('disabled', 'disabled');
   });
 }
     
@@ -213,18 +232,34 @@ function appendMessage(message) {
  * Send URL to receiver
  */
 function update() {
-  var index = parseInt($("#select").val(), 10);
-  var url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/apex/' %>'+
-    pages[index].name;
-  if (pages[index].controllertype === "1") {
-    url += '?id='+$('#record').val();
-  }
-  console.log("Sending", url);
-  sendMessage(url);
+    var val = $("input[type=submit][clicked=true]").val();
+
+    var url = '';
+    if (val === 'Send Page') {
+        var index = parseInt($("#select").val(), 10);
+        url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/apex/' %>'+
+            pages[index].name;
+        if (pages[index].controllertype === "1") {
+            url += '?id='+$('#record').val();
+        }
+    } else {
+        url = '<%- oauth.instance_url+'/secur/frontdoor.jsp?sid='+oauth.access_token+'&retURL=/' %>'+
+            $('#customurl').val();
+    }
+    console.log("Sending", url);
+    sendMessage(url);
+}
+
+function typeChange() {
+    var type = $('input[name=type]:checked').val();
+     
+    $('#urlrow').toggleClass('hidden', type === 'vfpage');
+    $('#pagerow').toggleClass('hidden', type !== 'vfpage');
+    $('#recordrow').toggleClass('hidden', type !== 'vfpage');
 }
 
 function selectChange() {
-  var $send = $('#send');
+  var $send = $('#sendPage');
   var $pageSelect = $('#select');
   var $recSelect = $('#record');
   var $recordrow = $('#recordrow');
@@ -282,7 +317,27 @@ function transcribe(words) {
 		<td>
 			<form method="get" action="javascript:update();">
         <table id="inner">
-          <tr>
+            <tr>
+                <td>
+                    <label for="type">Page Type:</label>
+                </td>
+                <td colspan="2">
+                    <input type="radio" name="type" value="vfpage" onchange="typeChange()" checked/>Visualforce Page
+                    <input type="radio" name="type" value="customurl" onChange="typeChange()"/>Custom URL
+                </td>
+            </tr>
+            <tr id="urlrow">
+                <td>
+                    <label>Custom URL:</label>
+                </td>
+                <td>
+                    <input id="customurl" type="text" class="border" placeholder="URL to send (e.g. '001000000012345/e')">
+                </td> 
+                <td>
+                    <input id="sendURL" type="submit" value="Send URL" />
+                </td>
+            </tr>
+          <tr id="pagerow">
             <td>
               <label for="select">Visualforce Page: </label>
             </td>
@@ -294,7 +349,7 @@ function transcribe(words) {
               </select>
             </td>
             <td>
-              <input id="send" type="submit" value="Send" />
+              <input id="sendPage" type="submit" value="Send Page" />
             </td>
           </tr>
           <tr id="recordrow" style="visibility: hidden;">
