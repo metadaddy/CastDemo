@@ -104,6 +104,15 @@ var namespace = 'urn:x-cast:com.force.demo.cast';
 var session = null;
 var pages = JSON.parse('<%- JSON.stringify(pages) %>');
 
+$(document).ready(function() {
+    //specify which form button was selected 
+    $("input[type=submit]").click(function() {
+        console.log('clicked');
+        $("input[type=submit]", $(this).parents("form")).removeAttr("clicked");
+        $(this).attr("clicked", "true");
+    });
+});
+
 /**
  * Call initialization for Cast
  */
